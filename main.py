@@ -5,7 +5,8 @@ import os
 import random
 from gtts import gTTS
 import time
-
+import re
+from termcolor import cprint
 
 r = sr.Recognizer()
 
@@ -30,18 +31,26 @@ for a in item_list:
     if a == '':
         item_list.pop(num)
 
+# Load the prices
+
+price_list = list()
+temp = []
+fprice = open(r'C:\Users\scorp\Desktop\Programmin\Python\Python Projects\SpeechRec1\venv\Prices.txt', 'r+')
+for line in fprice.readlines():
+    stripped = line.strip()
+    l = stripped
+    temp.append(l)
+for x in temp:
+    number = re.findall(r'\d+', x)
+    price_list.append(number[0])
+
+
+
 print(f'----------------MENU----------------\n')
 num1 = 0
-for listitem in item_list:
-    num1 += 1
-    print(f' {num1}.{listitem} ')
+for indx, listitem in enumerate(item_list):
+    print(f'{indx+1}.{listitem} // PRICE: {price_list[indx]} ')
 print('\n\n')
-
-
-def there_exists_items(item_list):
-    for x in item_list:
-        if x in voice_data:
-            return True
 
 
 def there_exists(terms):
@@ -58,9 +67,8 @@ def my_order(orders_list):
     fhand2 = open('Orders.txt', 'w')
     fhand2.writelines(orders_list)
     fhand2 = open('Orders.txt')
-    content = fhand2.read()
     fhand2.close()
-    print(content)
+
 
 
 def record_audio(ask=False):
@@ -135,6 +143,20 @@ def try_to_guess(word):
     return word
 
 
+def printorders(l):
+    nums = []
+    print('\n')
+    for x in range(len(l)):
+        cprint(f'{x+1}.{l[x]}', 'yellow')
+
+        # To get and print the total
+
+        indx = item_list.index(l[x].strip())
+        num = price_list[indx]
+        nums.append(int(num))
+
+    total = sum(nums)
+    cprint(f'Total: {str(total)}', 'green')
 
 
 def respond(voice_data):
@@ -160,13 +182,11 @@ def respond(voice_data):
         else:
             speaking_assistant(f'There is no {ordered_item} in the menu')
     if there_exists(['I want to see my orders', 'Open my orders', 'show me my orders']):
-        print(orders_list)
+        speaking_assistant('Here are your Orders: ')
+        printorders(orders_list)
 
 
-
-
-
-time.sleep(0)
+time.sleep(1)
 speaking_assistant('Speech Service Activated')
 speaking_assistant('If you would like to order, ask me saying (I would like to order..) followed by your order :)')
 while True:
